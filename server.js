@@ -4,16 +4,20 @@ const mysql = require("mysql2");
 const app = express();
 app.use(express.json());
 
-// DB connection
+const dbUrl = process.env.MYSQL_URL;
+
+// Parse Railway MySQL URL
+const urlObj = new URL(dbUrl);
+
 const db = mysql.createConnection({
-    host: process.env.MYSQL_URL,
-    user: "root",
-    password: "jlDYMucnfwLHXuvtJnkXfeNHZsKVcIIV",
-    database: "railway",
-    port: 32669
+    host: urlObj.hostname,
+    user: urlObj.username,
+    password: urlObj.password,
+    database: urlObj.pathname.replace("/", ""),
+    port: urlObj.port,
 });
 
-// connect the DB
+// Connect DB
 db.connect((err) => {
     if (err) {
         console.log("DB CONNECTION FAILED:", err);
@@ -22,9 +26,6 @@ db.connect((err) => {
     }
 });
 
-
-
-// CREATE TABLES ROUTE
 // CREATE TABLES ROUTE
 app.get("/create-tables", (req, res) => {
     const queries = [
@@ -52,8 +53,6 @@ app.get("/ranges", (req, res) => {
         res.json(results);
     });
 });
-
-
 
 // SERVER START
 app.listen(3000, () => {
